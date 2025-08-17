@@ -25,6 +25,7 @@ use state::State as AppStateInner;
 struct AppState {
     inner: Arc<AppStateInner>,
     tx_queue: Arc<Mutex<Vec<Tx>>>,
+    transactions_per_block: u64,
     // Optionally: settlement config (contract address, rpc URL) could be here
 }
 
@@ -62,17 +63,21 @@ async fn main() -> anyhow::Result<()> {
     let app_state = AppState {
         inner: Arc::new(AppStateInner::new()),
         tx_queue: Arc::new(Mutex::new(Vec::new())),
+        transactions_per_block: 10, // Default: 10 transactions per block
     };
 
     // Seed demo accounts (Phase 0 convenience)
     app_state.inner.credit("alice", 1_000_000);
     app_state.inner.credit("bob", 1000);
+    app_state.inner.credit("charlie", 500_000);
+    app_state.inner.credit("diana", 750_000);
 
     // Build router
     let router = Router::new()
         .route("/tx", post(post_tx))
         .route("/block/produce", post(produce_block))
         .route("/state/:addr", get(get_state))
+        .route("/config/tx-per-block", post(set_tx_per_block))
         .with_state(app_state.clone());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -111,10 +116,47 @@ async fn get_state(
     (StatusCode::OK, Json(body))
 }
 
+#[derive(Deserialize)]
+struct TxPerBlockConfig {
+    transactions_per_block: u64,
+}
+
+/// POST /config/tx-per-block
+async fn set_tx_per_block(
+    AxState(mut app_state): AxState<AppState>,
+    Json(config): Json<TxPerBlockConfig>,
+) -> impl IntoResponse {
+    if config.transactions_per_block == 0 {
+        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+            "error": "transactions_per_block must be greater than 0"
+        })));
+    }
+    
+    app_state.transactions_per_block = config.transactions_per_block;
+    
+    let body = serde_json::json!({
+        "message": "Configuration updated",
+        "transactions_per_block": app_state.transactions_per_block
+    });
+    (StatusCode::OK, Json(body))
+}
+
 /// POST /block/produce
 /// Executes queued transactions, writes a DA blob (local file), generates a mock proof,
 /// and optionally calls a settlement submit helper script (if present).
 async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoResponse {
+    // Check if we have any transactions to produce a block
+    let queue_size = {
+        let q = app_state.tx_queue.lock().unwrap();
+        q.len()
+    };
+    
+    if queue_size == 0 {
+        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+            "error": "No transactions in queue to produce block"
+        })));
+    }
+
     // Incremental block numbering using stored state.last_block
     let (prev_block, prev_root) = {
         // commit a "current" block number snapshot (we'll use state.commit_block to get prior root)
@@ -131,10 +173,14 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
 
     let next_block = prev_block + 1;
 
-    // Drain queue
+    // Drain queue (take only first transactions_per_block transactions)
     let txs: Vec<Tx> = {
         let mut q = app_state.tx_queue.lock().unwrap();
-        let drained = q.drain(..).collect::<Vec<Tx>>();
+        let mut drained = Vec::new();
+        let tx_count = std::cmp::min(app_state.transactions_per_block as usize, q.len());
+        for _ in 0..tx_count {
+            drained.push(q.remove(0));
+        }
         drained
     };
 
