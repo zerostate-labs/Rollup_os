@@ -63,7 +63,7 @@ async fn main() -> anyhow::Result<()> {
     let app_state = AppState {
         inner: Arc::new(AppStateInner::new()),
         tx_queue: Arc::new(Mutex::new(Vec::new())),
-        transactions_per_block: 10, // Default: 10 transactions per block
+        transactions_per_block: 100, // Default: 10 transactions per block
     };
 
     // Seed demo accounts (Phase 0 convenience)

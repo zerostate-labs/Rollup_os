@@ -6,8 +6,8 @@
 set -e
 
 # Configuration
-TRANSACTIONS_PER_BLOCK=10  # 10 transactions per block
-TOTAL_TRANSACTIONS=25      # Total transactions to submit (will create 3 blocks: 10, 10, 5)
+TRANSACTIONS_PER_BLOCK=100  # 100 transactions per block
+TOTAL_TRANSACTIONS=500      # Total transactions to submit (will create 5 blocks: 100, 100, 100, 100, 100)
 
 echo "Starting Rollup Node Integration Test..."
 echo "========================================"
