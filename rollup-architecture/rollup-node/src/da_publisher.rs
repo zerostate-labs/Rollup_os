@@ -3,13 +3,36 @@ use sha2::{Digest, Sha256};
 use std::fs;
 use std::path::Path;
 
-/// Blob data structure that we post to DA
+/// Block header
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BlockHeader {
+    pub parent_hash: String,         // H256 as hex string for now
+    pub block_number: u64,
+    pub timestamp: u64,
+    pub proposer: String,           // Address as hex string
+    pub state_root: String,         // H256 as hex string
+    pub txs_root: String,           // H256 as hex string
+    pub receipts_root: String,      // H256 as hex string
+    pub da_pointer: String,         // BlobCommitment placeholder
+    pub l1_finality_pointer: String, // L1Commitment placeholder
+}
+
+/// Execution results from state transition
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExecutionResult {
+    pub state_root: String,
+    pub receipts_root: String,
+    pub gas_used: u64,
+}
+
+/// Main block structure that we post to DA
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Blob {
-    pub block_number: u64,
-    pub txs: Vec<String>,       // flattened tx list for simplicity
-    pub oracle_commit: String,  // commit string from Oracle input layer
-    pub state_root: String,     // post-state root for this block
+    pub header: BlockHeader,
+    pub transactions: Vec<String>,    // flattened tx list for simplicity
+    pub execution_payload: ExecutionResult,
+    pub oracle_commit: String,
+    pub proofs: Option<String>,
 }
 
 /// Ensure that the given directory exists
@@ -24,7 +47,7 @@ pub fn ensure_dir<P: AsRef<Path>>(dir: P) -> anyhow::Result<()> {
 pub fn write_blob<P: AsRef<Path>>(dir: P, blob: &Blob) -> anyhow::Result<(String, String)> {
     let json_data = serde_json::to_vec_pretty(&blob)?;
     let hash = hash_bytes(&json_data);
-    let filename = format!("block_{:06}.json", blob.block_number);
+    let filename = format!("block_{:06}.json", blob.header.block_number);
     let full_path = dir.as_ref().join(filename);
 
     fs::write(&full_path, &json_data)?;

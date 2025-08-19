@@ -6,6 +6,7 @@ use axum::{
     Json, Router,
 };
 
+use sha2::Digest;
 use serde::{Deserialize, Serialize};
 use std::{
     net::SocketAddr,
@@ -202,11 +203,43 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
     let oracle_commit = oracle_adapter::current_oracle_commit();
 
     // Build blob and write to local DA directory
-    let blob = da_publisher::Blob {
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    
+    let txs_root = {
+        let mut hasher = sha2::Sha256::new();
+        for tx in &txs {
+            hasher.update(format!("{}=>{}:{}", &tx.from, &tx.to, &tx.amount).as_bytes());
+        }
+        hex::encode(hasher.finalize())
+    };
+
+    let header = da_publisher::BlockHeader {
+        parent_hash: prev_root.clone(),
         block_number: next_block,
-        txs: txs.iter().map(|t| format!("{}=>{}:{}", &t.from, &t.to, &t.amount)).collect(),
-        oracle_commit: oracle_commit.clone(),
+        timestamp,
+        proposer: "0x0000000000000000000000000000000000000000".to_string(),
         state_root: post_root.clone(),
+        txs_root: txs_root.clone(),
+        receipts_root: "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        da_pointer: "".to_string(),
+        l1_finality_pointer: "".to_string(),
+    };
+
+    let execution_result = da_publisher::ExecutionResult {
+        state_root: post_root.clone(),
+        receipts_root: "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
+        gas_used: 0,
+    };
+
+    let blob = da_publisher::Blob {
+        header,
+        transactions: txs.iter().map(|t| format!("{}=>{}:{}", &t.from, &t.to, &t.amount)).collect(),
+        execution_payload: execution_result,
+        oracle_commit: oracle_commit.clone(),
+        proofs: None,
     };
 
     // Ensure local DA dir & write blob
