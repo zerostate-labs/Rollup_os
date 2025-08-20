@@ -31,7 +31,7 @@ pub struct BlobConfig {
 impl Default for BlobConfig {
     fn default() -> Self {
         Self {
-            blocks_per_blob: 2,
+            blocks_per_blob: 5,
             namespace_id: "0000000000000000".to_string(),
             share_version: 0,
         }

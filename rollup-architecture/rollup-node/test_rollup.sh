@@ -7,8 +7,8 @@ set -e
 
 # Configuration
 TRANSACTIONS_PER_BLOCK=100  # 100 transactions per block
-BLOCKS_PER_BLOB=2          # 2 blocks per blob
-TOTAL_TRANSACTIONS=500     # Total transactions to submit (will create 5 blocks)
+BLOCKS_PER_BLOB=5          # 5 blocks per blob
+TOTAL_TRANSACTIONS=2500    # Total transactions to submit (25 blocks × 100 transactions)
 
 echo "Starting Rollup Node Integration Test with Blob Creation..."
 echo "=========================================================="
@@ -17,7 +17,7 @@ echo "  Transactions per block: $TRANSACTIONS_PER_BLOCK"
 echo "  Blocks per blob: $BLOCKS_PER_BLOB"
 echo "  Total transactions: $TOTAL_TRANSACTIONS"
 echo "  Expected blocks: $(( (TOTAL_TRANSACTIONS + TRANSACTIONS_PER_BLOCK - 1) / TRANSACTIONS_PER_BLOCK ))"
-echo "  Expected blobs: $(( (5 + BLOCKS_PER_BLOB - 1) / BLOCKS_PER_BLOB )) (2 blocks + 2 blocks + 1 block)"
+echo "  Expected blobs: $(( (25 + BLOCKS_PER_BLOB - 1) / BLOCKS_PER_BLOB )) (5 blocks per blob = 5 blobs total)"
 echo ""
 
 # Start the rollup node in background
@@ -171,10 +171,10 @@ echo "====================================================="
 
 # First, let's load all blocks from storage
 echo ""
-echo "Loading all blocks (1, 2, 3, 4, 5) from storage..."
+echo "Loading all blocks (1-25) from storage..."
 load_response=$(curl -s -X POST http://localhost:8080/blob/load-blocks \
     -H "Content-Type: application/json" \
-    -d '{"block_numbers": [1, 2, 3, 4, 5]}')
+    -d '{"block_numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]}')
 
 echo "$load_response" | jq -r '"Loaded blocks: " + (.loaded_blocks | tostring) + " / " + (.total_blocks_requested | tostring)'
 
@@ -226,4 +226,4 @@ echo "Summary:"
 echo "  - Processed $TOTAL_TRANSACTIONS transactions"
 echo "  - Created $(ls local-da/block_*.json 2>/dev/null | wc -l) blocks"
 echo "  - Generated $(echo "$final_list_response" | jq -r '.total') Celestia blobs"
-echo "  - Expected blob distribution: 2+2+1 blocks per blob = 3 blobs total"
+echo "  - Expected blob distribution: 5 blocks per blob = 5 blobs total"
