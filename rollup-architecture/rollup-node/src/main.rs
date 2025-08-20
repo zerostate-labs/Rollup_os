@@ -19,14 +19,17 @@ mod da_publisher;
 mod oracle_adapter;
 mod proof_adapter;
 mod state;
+mod blob_builder;
 
 use state::State as AppStateInner;
+use blob_builder::{BlobBuilder, BlobConfig};
 
 #[derive(Clone)]
 struct AppState {
     inner: Arc<AppStateInner>,
     tx_queue: Arc<Mutex<Vec<Tx>>>,
     transactions_per_block: u64,
+    blob_builder: Arc<Mutex<BlobBuilder>>,
     // Optionally: settlement config (contract address, rpc URL) could be here
 }
 
@@ -61,10 +64,17 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     // Instantiate global state
+    let blob_config = BlobConfig {
+        blocks_per_blob: 2,
+        namespace_id: "0000000000000000".to_string(),
+        share_version: 0,
+    };
+    
     let app_state = AppState {
         inner: Arc::new(AppStateInner::new()),
         tx_queue: Arc::new(Mutex::new(Vec::new())),
-        transactions_per_block: 100, // Default: 10 transactions per block
+        transactions_per_block: 100, // Default: 100 transactions per block
+        blob_builder: Arc::new(Mutex::new(BlobBuilder::new(blob_config))),
     };
 
     // Seed demo accounts (Phase 0 convenience)
@@ -77,8 +87,13 @@ async fn main() -> anyhow::Result<()> {
     let router = Router::new()
         .route("/tx", post(post_tx))
         .route("/block/produce", post(produce_block))
+        .route("/blob/create", post(create_blobs))
+        .route("/blob/create-from-blocks", post(create_blobs_from_blocks))
+        .route("/blob/load-blocks", post(load_blocks_from_storage))
+        .route("/blob/list", get(list_blobs))
         .route("/state/:addr", get(get_state))
         .route("/config/tx-per-block", post(set_tx_per_block))
+        .route("/config/blocks-per-blob", post(set_blocks_per_blob))
         .with_state(app_state.clone());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -138,6 +153,32 @@ async fn set_tx_per_block(
     let body = serde_json::json!({
         "message": "Configuration updated",
         "transactions_per_block": app_state.transactions_per_block
+    });
+    (StatusCode::OK, Json(body))
+}
+
+#[derive(Deserialize)]
+struct BlocksPerBlobConfig {
+    blocks_per_blob: usize,
+}
+
+/// POST /config/blocks-per-blob
+async fn set_blocks_per_blob(
+    AxState(app_state): AxState<AppState>,
+    Json(config): Json<BlocksPerBlobConfig>,
+) -> impl IntoResponse {
+    if config.blocks_per_blob == 0 {
+        return (StatusCode::BAD_REQUEST, Json(serde_json::json!({
+            "error": "blocks_per_blob must be greater than 0"
+        })));
+    }
+    
+    let mut builder = app_state.blob_builder.lock().unwrap();
+    builder.config.blocks_per_blob = config.blocks_per_blob;
+    
+    let body = serde_json::json!({
+        "message": "Blob configuration updated",
+        "blocks_per_blob": config.blocks_per_blob
     });
     (StatusCode::OK, Json(body))
 }
@@ -242,6 +283,16 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         proofs: None,
     };
 
+    // Add block to blob builder for later blob creation
+    {
+        let mut builder = app_state.blob_builder.lock().unwrap();
+        builder.add_block(
+            next_block,
+            txs.iter().map(|t| format!("{}=>{}:{}", &t.from, &t.to, &t.amount)).collect(),
+            timestamp,
+        );
+    }
+
     // Ensure local DA dir & write blob
     if let Err(e) = da_publisher::ensure_dir("local-da") {
         tracing::error!("failed to ensure local-da dir: {}", e);
@@ -292,4 +343,185 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
     };
 
     (StatusCode::OK, Json(serde_json::to_value(resp).unwrap()))
+}
+
+/// POST /blob/create - Create Celestia blobs from blocks in memory
+async fn create_blobs(
+    AxState(app_state): AxState<AppState>,
+) -> impl IntoResponse {
+    let mut builder = app_state.blob_builder.lock().unwrap();
+    
+    let blobs = match builder.create_blobs_from_blocks() {
+        Ok(blobs) => blobs,
+        Err(e) => {
+            tracing::error!("failed to create blobs: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                "error": "failed to create blobs"
+            })));
+        }
+    };
+
+    // Save blobs to local storage
+    let mut saved_blobs = Vec::new();
+    for (blob, metadata) in &blobs {
+        match blob_builder::utils::save_blob("local-da", blob, metadata) {
+            Ok(path) => {
+                saved_blobs.push(serde_json::json!({
+                    "blob_id": metadata.blob_id,
+                    "path": path,
+                    "commitment": metadata.commitment,
+                    "transaction_count": metadata.transaction_count,
+                    "block_numbers": metadata.block_numbers,
+                }));
+            }
+            Err(e) => {
+                tracing::error!("failed to save blob {}: {}", metadata.blob_id, e);
+            }
+        }
+    }
+
+    let response = serde_json::json!({
+        "created_blobs": saved_blobs.len(),
+        "blobs": saved_blobs,
+        "blocks_processed": builder.block_count(),
+        "total_transactions": builder.total_transaction_count(),
+    });
+
+    (StatusCode::OK, Json(response))
+}
+
+#[derive(Deserialize)]
+struct LoadBlocksRequest {
+    block_numbers: Vec<u64>,
+}
+
+/// POST /blob/load-blocks - Load blocks from storage into blob builder
+async fn load_blocks_from_storage(
+    AxState(app_state): AxState<AppState>,
+    Json(request): Json<LoadBlocksRequest>,
+) -> impl IntoResponse {
+    let mut builder = app_state.blob_builder.lock().unwrap();
+    let mut loaded_blocks = 0;
+    let mut errors = Vec::new();
+
+    for &block_number in &request.block_numbers {
+        match blob_builder::utils::load_block("local-da", block_number) {
+            Ok(block_data) => {
+                builder.add_block(block_data.block_number, block_data.transactions, block_data.timestamp);
+                loaded_blocks += 1;
+            }
+            Err(e) => {
+                errors.push(format!("Block {}: {}", block_number, e));
+            }
+        }
+    }
+
+    let response = serde_json::json!({
+        "loaded_blocks": loaded_blocks,
+        "total_blocks_requested": request.block_numbers.len(),
+        "errors": errors,
+        "current_blocks_in_builder": builder.block_count(),
+        "total_transactions": builder.total_transaction_count(),
+    });
+
+    (StatusCode::OK, Json(response))
+}
+
+/// POST /blob/create-from-blocks - Create blobs from blocks loaded in builder
+async fn create_blobs_from_blocks(
+    AxState(app_state): AxState<AppState>,
+) -> impl IntoResponse {
+    let mut builder = app_state.blob_builder.lock().unwrap();
+    
+    // Create blobs from loaded blocks
+    let blobs = match builder.create_blobs_from_blocks() {
+        Ok(blobs) => blobs,
+        Err(e) => {
+            tracing::error!("failed to create blobs from blocks: {}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
+                "error": "failed to create blobs from blocks"
+            })));
+        }
+    };
+
+    // Save blobs to local storage
+    let mut saved_blobs = Vec::new();
+    for (blob, metadata) in &blobs {
+        match blob_builder::utils::save_blob("local-da", blob, metadata) {
+            Ok(path) => {
+                saved_blobs.push(serde_json::json!({
+                    "blob_id": metadata.blob_id,
+                    "path": path,
+                    "commitment": metadata.commitment,
+                    "transaction_count": metadata.transaction_count,
+                    "block_numbers": metadata.block_numbers,
+                }));
+            }
+            Err(e) => {
+                tracing::error!("failed to save blob {}: {}", metadata.blob_id, e);
+            }
+        }
+    }
+
+    let response = serde_json::json!({
+        "created_blobs": saved_blobs.len(),
+        "blobs": saved_blobs,
+        "blocks_processed": builder.block_count(),
+        "total_transactions": builder.total_transaction_count(),
+    });
+
+    (StatusCode::OK, Json(response))
+}
+
+/// GET /blob/list - List all created blobs
+async fn list_blobs(
+    AxState(_app_state): AxState<AppState>,
+) -> impl IntoResponse {
+    let blob_dir = std::path::Path::new("local-da").join("blobs");
+    
+    if !blob_dir.exists() {
+        return (StatusCode::OK, Json(serde_json::json!({
+            "blobs": [],
+            "total": 0
+        })));
+    }
+
+    let mut blobs = Vec::new();
+    
+    if let Ok(entries) = std::fs::read_dir(blob_dir) {
+        for entry in entries {
+            if let Ok(entry) = entry {
+                if let Some(extension) = entry.path().extension() {
+                    if extension == "json" {
+                        if let Ok(metadata_json) = std::fs::read_to_string(entry.path()) {
+                            if let Ok(metadata) = serde_json::from_str::<blob_builder::BlobMetadata>(&metadata_json) {
+                                blobs.push(serde_json::json!({
+                                    "blob_id": metadata.blob_id,
+                                    "commitment": metadata.commitment,
+                                    "transaction_count": metadata.transaction_count,
+                                    "block_numbers": metadata.block_numbers,
+                                    "created_at": metadata.created_at,
+                                    "namespace_id": metadata.namespace_id,
+                                }));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Sort by blob_id
+    blobs.sort_by(|a, b| {
+        let a_id = a["blob_id"].as_str().unwrap_or("");
+        let b_id = b["blob_id"].as_str().unwrap_or("");
+        a_id.cmp(b_id)
+    });
+
+    let response = serde_json::json!({
+        "blobs": blobs,
+        "total": blobs.len()
+    });
+
+    (StatusCode::OK, Json(response))
 }
