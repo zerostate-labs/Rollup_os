@@ -1,4 +1,5 @@
-# 🏗️ Rollup Architecture – State Machine
+# 🏗️ Rollup Architecture – State Machine (Build Anything. Prove Everything. Scale Everywhere)
+# Plug. Play. Prove. The Next-Gen Rollup OS
 
 A modular **TowerABCI-based rollup** architecture featuring:
 - **Ethereum Settlement** with smart contracts
