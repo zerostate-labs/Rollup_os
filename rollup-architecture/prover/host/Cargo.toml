@@ -1,0 +1,12 @@
+[package]
+name = "rollup-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm.workspace = true
+rollup-methods = { path = "../methods" }
+rollup-shared-types = { path = "../shared-types" }
+rollup-core-state = { path = "../core-state" }
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"

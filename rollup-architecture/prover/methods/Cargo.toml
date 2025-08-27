@@ -1,0 +1,13 @@
+[package]
+name = "rollup-methods"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm.workspace = true
+
+[build-dependencies]
+risc0-build.workspace = true
+
+[package.metadata.risc0]
+methods = ["rollup-guest"]

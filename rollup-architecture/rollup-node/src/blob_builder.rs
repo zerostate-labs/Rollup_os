@@ -149,7 +149,7 @@ impl BlobBuilder {
     /// Serialize block and transaction data for the blob
     fn serialize_blob_data(&self, block_numbers: &[u64], transactions: &[String]) -> Result<Vec<u8>> {
         let blob_content = serde_json::json!({
-            "version": "2.0",
+            "version": "1.0",
             "blocks_per_blob": self.config.blocks_per_blob,
             "block_numbers": block_numbers,
             "transactions": transactions,
