@@ -3,10 +3,10 @@
 **/*.rs.bk
 *.pdb
 
-# Cargo
-Cargo.lock
+# Cargo lock files (uncomment if you want to ignore them)
+# Cargo.lock
 
-# IDE files
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
@@ -25,50 +25,30 @@ Thumbs.db
 # Logs
 *.log
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-node_modules/
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
 # Temporary files
 *.tmp
 *.temp
 
-# RISC0 specific
-methods/guest/target/
-methods/host/target/
-core-state/target/
-shared-types/target/
-host/target/
-guest/target/
-verifier/target/
+# Risc0 specific
+*.bin
+*.hex
+proof_*.json
+receipt_*.json
 
-# Generated files
-*.cc
-*.h
-cxxbridge/
+# Build outputs
+*.wasm
+*.so
+*.dylib
+*.dll
+
+# Coverage reports
+tarpaulin-report.html
+lcov.info
+
+# Profiling data
+*.prof
+perf.data*
+
+# Backup files
+*.bak
+*.backup

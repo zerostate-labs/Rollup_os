@@ -1,12 +1,18 @@
 [package]
-name = "rollup-host"
+name = "prover_host"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-zkvm.workspace = true
-rollup-methods = { path = "../methods" }
-rollup-shared-types = { path = "../shared-types" }
-rollup-core-state = { path = "../core-state" }
+anyhow = "1.0"
+hex = "0.4"
+methods = { path = "../methods" }
+risc0-zkvm = { version = "^3.0.3" }
 serde = { version = "1.0", features = ["derive"] }
 bincode = "1.3"
+
+[lib]
+name = "prover_host"
+path = "src/lib.rs"
+
+

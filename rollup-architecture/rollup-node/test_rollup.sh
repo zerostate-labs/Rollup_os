@@ -46,8 +46,11 @@ echo "  Start time: $(date)"
 echo ""
 
 # Start the rollup node in background
-echo "Starting rollup node..."
-cargo run &
+echo "Prebuilding rollup node (prover dev mode) to avoid startup timeout..."
+RISC0_DEV_MODE=1 cargo build --release --features prover >/dev/null 2>&1 || true
+
+echo "Starting rollup node (prover dev mode)..."
+RISC0_DEV_MODE=1 RUST_LOG=info RISC0_INFO=1 cargo run --release --features prover > node.out 2>&1 &
 NODE_PID=$!
 
 # Function to cleanup on exit
@@ -173,13 +176,15 @@ analyze_execution_failures() {
 
 # Wait for node to start (from older script - simpler approach)
 echo "Waiting for rollup node to start..."
-for i in {1..15}; do
+for i in {1..120}; do
     if curl -s --max-time 2 http://localhost:8080/state/alice > /dev/null 2>&1; then
         echo "Rollup node is ready!"
         break
     fi
-    if [ $i -eq 15 ]; then
-        echo "Error: Rollup node failed to start after 15 attempts"
+    if [ $i -eq 120 ]; then
+        echo "Error: Rollup node failed to start after 120 attempts"
+        echo "--- Last 100 lines of node.out ---"
+        tail -n 100 node.out 2>/dev/null || true
         exit 1
     fi
     echo -n "."
@@ -245,10 +250,15 @@ for batch_start in $(seq 0 $BATCH_SIZE $((TOTAL_TRANSACTIONS - 1))); do
         echo "Producing Block $block_number (Progress: $tx_count/$TOTAL_TRANSACTIONS txs)..."
         
         # Fast block production (from older script approach)
-        if block_response=$(curl -s -X POST http://localhost:8080/block/produce --max-time 10); then
+        if block_response=$(curl -s -X POST http://localhost:8080/block/produce --max-time 30); then
             if echo "$block_response" | jq -e '.block_number' > /dev/null 2>&1; then
-                echo "✓ Block $(echo "$block_response" | jq -r '.block_number') created"
+                echo "✓ Block $(echo "$block_response" | jq -r '.block_number') created | proof_len=$(echo "$block_response" | jq -r '.proof_len') verified=$(echo "$block_response" | jq -r '.proof_verified')"
                 blocks_produced=$((blocks_produced + 1))
+                # Save proof to file for demo
+                proof_hex=$(echo "$block_response" | jq -r '.proof_hex')
+                if [ "$proof_hex" != "null" ] && [ -n "$proof_hex" ]; then
+                    echo "$proof_hex" | tr -d '\n' > "local-da/proof_block_$(echo "$block_response" | jq -r '.block_number').hex" 2>/dev/null || true
+                fi
             else
                 echo "⚠ Block production response: $block_response"
             fi
@@ -349,6 +359,14 @@ BLOB_END_TIME=$(date +%s)
 echo ""
 echo "Final Verification..."
 total_blobs=$(curl -s -X GET http://localhost:8080/blob/list --max-time 5 | jq -r '.total // 0')
+proof_files=$(ls -1 local-da/proof_block_*.hex 2>/dev/null | wc -l)
+
+echo "Proof artifacts saved: $proof_files"
+if [ "$proof_files" -gt 0 ]; then
+    echo "Example proof (hex preview):"
+    head -c 64 $(ls -1 local-da/proof_block_*.hex | head -n1) 2>/dev/null || true
+    echo ""
+fi
 
 END_TIME=$(date +%s)
 

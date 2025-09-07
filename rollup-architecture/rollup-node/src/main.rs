@@ -54,6 +54,8 @@ struct ProduceResp {
     blob_path: String,
     blob_hash: String,
     proof_len: usize,
+    proof_hex: String,
+    proof_verified: bool,
 }
 
 #[tokio::main]
@@ -306,8 +308,14 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         }
     };
 
-    // Generate mock proof for Phase 0
-    let proof = proof_adapter::generate_mock_proof(&prev_root, &post_root, &blob_hash, &oracle_commit);
+    let proof = proof_adapter::generate_proof(&prev_root, &post_root, &blob_hash, &oracle_commit);
+    let proof_verified = proof_adapter::verify_proof_unified(
+        &proof,
+        &prev_root,
+        &post_root,
+        &blob_hash,
+        &oracle_commit,
+    );
 
     // Optionally submit to settlement via helper script (if exists)
     if std::path::Path::new("scripts/submit-settlement.js").exists() {
@@ -340,6 +348,8 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         blob_path,
         blob_hash,
         proof_len: proof.len(),
+        proof_hex: hex::encode(&proof),
+        proof_verified,
     };
 
     (StatusCode::OK, Json(serde_json::to_value(resp).unwrap()))
