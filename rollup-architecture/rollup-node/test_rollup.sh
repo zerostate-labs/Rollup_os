@@ -6,10 +6,12 @@
 set -e
 
 # Configuration
-TRANSACTIONS_PER_BLOCK=100  # 100 transactions per block
-BLOCKS_PER_BLOB=5          # 5 blocks per blob
-TOTAL_TRANSACTIONS=2500    # Total transactions to submit (25 blocks × 100 transactions)
-BATCH_SIZE=50              # Submit transactions in batches for better performance
+TRANSACTIONS_PER_BLOCK=1000  # 1000 transactions per block
+BLOCKS_PER_BLOB=5           # 5 blocks per blob
+TOTAL_TRANSACTIONS=50000   # Total transactions to submit (50 blocks × 1000 transactions)
+BATCH_SIZE=100             # Submit transactions in batches for better performance
+
+# Account initialization will happen after node starts
 
 # Metrics tracking
 START_TIME=$(date +%s)
@@ -21,10 +23,14 @@ NETWORK_ERRORS=0
 
 # Nonce tracking per account (local tracking only - like older script)
 declare -A ACCOUNT_NONCES
-ACCOUNT_NONCES["alice"]=0
-ACCOUNT_NONCES["bob"]=0
-ACCOUNT_NONCES["charlie"]=0
-ACCOUNT_NONCES["diana"]=0
+# Stores on-chain starting nonces at the time we begin sending txs
+declare -A STARTING_NONCES
+# Local tracker for expected next nonce while submitting
+declare -A LOCAL_TRACKED_NONCES
+# Initialize 20 users with starting nonce of 0
+for i in {1..20}; do
+    ACCOUNT_NONCES["user$i"]=0
+done
 
 # Error tracking (from newer script)
 declare -A ERROR_DETAILS
@@ -41,7 +47,7 @@ echo "  Blocks per blob: $BLOCKS_PER_BLOB"
 echo "  Total transactions: $TOTAL_TRANSACTIONS"
 echo "  Batch size: $BATCH_SIZE"
 echo "  Expected blocks: $(( (TOTAL_TRANSACTIONS + TRANSACTIONS_PER_BLOCK - 1) / TRANSACTIONS_PER_BLOCK ))"
-echo "  Expected blobs: $(( (25 + BLOCKS_PER_BLOB - 1) / BLOCKS_PER_BLOB ))"
+echo "  Expected blobs: $(( (50 + BLOCKS_PER_BLOB - 1) / BLOCKS_PER_BLOB ))"
 echo "  Start time: $(date)"
 echo ""
 
@@ -74,21 +80,19 @@ submit_batch_transactions() {
             break
         fi
         
-        # Select transaction pattern (optimized)
-        local pattern_index=$((i % 8))
-        case $pattern_index in
-            0) from="alice"; to="bob" ;;
-            1) from="bob"; to="charlie" ;;
-            2) from="charlie"; to="diana" ;;
-            3) from="diana"; to="alice" ;;
-            4) from="alice"; to="charlie" ;;
-            5) from="bob"; to="diana" ;;
-            6) from="charlie"; to="alice" ;;
-            7) from="diana"; to="bob" ;;
-        esac
+        # Randomly select sender and receiver (different users)
+        local from_index=$((1 + RANDOM % 20))
+        local to_index=$from_index
+        while [ $to_index -eq $from_index ]; do
+            to_index=$((1 + RANDOM % 20))
+        done
         
-        local amount=$((100 + i * 5))
-        local nonce=${ACCOUNT_NONCES[$from]}
+        local from="user$from_index"
+        local to="user$to_index"
+        
+        # Random amount between 1000 and 10000 to simulate real transactions
+        local amount=$((1000 + RANDOM % 9001))
+        local nonce=${LOCAL_TRACKED_NONCES[$from]}
         
         # Submit transaction with basic error tracking
         local response=$(curl -s -X POST http://localhost:8080/tx \
@@ -99,7 +103,7 @@ submit_batch_transactions() {
         # Check if response indicates success
         if echo "$response" | grep -q '"queued":true' 2>/dev/null; then
             successful=$((successful + 1))
-            ACCOUNT_NONCES[$from]=$((nonce + 1))
+            LOCAL_TRACKED_NONCES[$from]=$((nonce + 1))
         else
             failed=$((failed + 1))
             # Basic error classification
@@ -132,46 +136,40 @@ analyze_execution_failures() {
     echo "Analyzing Transaction Execution Results..."
     echo "========================================"
     
-    # Get final nonces
-    alice_final=$(curl -s http://localhost:8080/state/alice --max-time 3 | jq -r '.nonce // 0')
-    bob_final=$(curl -s http://localhost:8080/state/bob --max-time 3 | jq -r '.nonce // 0')
-    charlie_final=$(curl -s http://localhost:8080/state/charlie --max-time 3 | jq -r '.nonce // 0')
-    diana_final=$(curl -s http://localhost:8080/state/diana --max-time 3 | jq -r '.nonce // 0')
+    # Get final nonces for all 20 users and compute actual successes from nonce deltas
+    local total_success=0
     
-    # Count expected transactions per account based on our pattern
-    local alice_expected=0
-    local bob_expected=0
-    local charlie_expected=0
-    local diana_expected=0
-    
-    for i in $(seq 0 $((TOTAL_TRANSACTIONS - 1))); do
-        local pattern_index=$((i % 8))
-        case $pattern_index in
-            0|4) alice_expected=$((alice_expected + 1)) ;;
-            1|7) bob_expected=$((bob_expected + 1)) ;;
-            2|6) charlie_expected=$((charlie_expected + 1)) ;;
-            3|5) diana_expected=$((diana_expected + 1)) ;;
-        esac
+    echo "User Nonce Analysis:"
+    for i in {1..20}; do
+        local user="user$i"
+        local final_nonce=$(curl -s http://localhost:8080/state/$user --max-time 10 | jq -r '.nonce // 0')
+        local starting_nonce=${STARTING_NONCES[$user]}
+        # Guard empty values
+        if [ -z "$starting_nonce" ]; then starting_nonce=0; fi
+        if [ -z "$final_nonce" ]; then final_nonce=0; fi
+
+        local actual_increment=$((final_nonce - starting_nonce))
+        if [ $actual_increment -lt 0 ]; then
+            actual_increment=0
+        fi
+
+        total_success=$((total_success + actual_increment))
+
+        echo "  $user: Initial $starting_nonce, Final $final_nonce, Increment $actual_increment"
     done
     
-    # Calculate actual failures
-    local alice_failed=$((alice_expected - alice_final))
-    local bob_failed=$((bob_expected - bob_final))
-    local charlie_failed=$((charlie_expected - charlie_final))
-    local diana_failed=$((diana_expected - diana_final))
-    
-    local total_execution_failures=$((alice_failed + bob_failed + charlie_failed + diana_failed))
-    
-    echo "Expected vs Actual Nonce Analysis:"
-    echo "  Alice:   Expected $alice_expected, Actual $alice_final, Failed: $alice_failed"
-    echo "  Bob:     Expected $bob_expected, Actual $bob_final, Failed: $bob_failed"
-    echo "  Charlie: Expected $charlie_expected, Actual $charlie_final, Failed: $charlie_failed"
-    echo "  Diana:   Expected $diana_expected, Actual $diana_final, Failed: $diana_failed"
+    echo ""
+    echo "Overall Analysis:"
+    echo "  Total successful (by nonce deltas): $total_success"
+    local total_failed=$((TOTAL_TRANSACTIONS - total_success))
+    if [ $total_failed -lt 0 ]; then total_failed=0; fi
+    if [ $total_failed -gt $TOTAL_TRANSACTIONS ]; then total_failed=$TOTAL_TRANSACTIONS; fi
+    echo "  Estimated failures: $total_failed"
     echo ""
     
     # Update counters with actual execution failures
-    FAILED_TRANSACTIONS=$total_execution_failures
-    SUCCESSFUL_TRANSACTIONS=$((TOTAL_TRANSACTIONS - total_execution_failures))
+    FAILED_TRANSACTIONS=$total_failed
+    SUCCESSFUL_TRANSACTIONS=$total_success
 }
 
 # Wait for node to start (from older script - simpler approach)
@@ -194,6 +192,17 @@ done
 NODE_START_TIME=$(date +%s)
 echo "Rollup node started successfully (took $((NODE_START_TIME - START_TIME)) seconds)"
 
+# Initialize users with high balance to ensure sufficient funds for transactions
+echo "Initializing 20 users with 1,000,000 units each..."
+for i in {1..20}; do
+    # Each user starts with 1,000,000 units to ensure they have enough for transactions
+    curl -s -X POST http://localhost:8080/init_account \
+        -H "Content-Type: application/json" \
+        -d "{\"address\": \"user$i\", \"balance\": \"1000000\"}" \
+        --max-time 10 >/dev/null 2>&1
+done
+echo "Initialized 20 users with 1,000,000 units each"
+
 # Quick configuration (from older script)
 echo ""
 echo "Configuring node..."
@@ -210,22 +219,23 @@ echo "Node configured successfully"
 # Get initial state quickly (from older script approach)
 echo ""
 echo "Getting initial account states..."
-alice_state=$(curl -s http://localhost:8080/state/alice --max-time 3)
-bob_state=$(curl -s http://localhost:8080/state/bob --max-time 3)
-charlie_state=$(curl -s http://localhost:8080/state/charlie --max-time 3)
-diana_state=$(curl -s http://localhost:8080/state/diana --max-time 3)
+for i in {1..20}; do
+    user="user$i"
+    user_state=$(curl -s http://localhost:8080/state/$user --max-time 10)
+    nonce_val=$(echo "$user_state" | jq -r '.nonce // 0')
+    ACCOUNT_NONCES[$user]=$nonce_val
+    STARTING_NONCES[$user]=$nonce_val
+    LOCAL_TRACKED_NONCES[$user]=$nonce_val
+done
 
-ACCOUNT_NONCES["alice"]=$(echo "$alice_state" | jq -r '.nonce // 0')
-ACCOUNT_NONCES["bob"]=$(echo "$bob_state" | jq -r '.nonce // 0')
-ACCOUNT_NONCES["charlie"]=$(echo "$charlie_state" | jq -r '.nonce // 0')
-ACCOUNT_NONCES["diana"]=$(echo "$diana_state" | jq -r '.nonce // 0')
-
-echo "Initial Account Balances:"
-echo "-------------------------"
-echo "$alice_state" | jq -r '"Alice:   " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-echo "$bob_state" | jq -r '"Bob:     " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-echo "$charlie_state" | jq -r '"Charlie: " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-echo "$diana_state" | jq -r '"Diana:   " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
+echo "Initial Account Balances (first 5 users):"
+echo "----------------------------------------"
+for i in {1..5}; do
+    user="user$i"
+    user_state=$(curl -s http://localhost:8080/state/$user --max-time 10)
+    echo "$user_state" | jq -r '"'$user': " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
+done
+echo "... (and 15 more users)"
 
 # High-speed transaction processing (from older script)
 echo ""
@@ -279,7 +289,7 @@ TRANSACTION_END_TIME=$(date +%s)
 echo ""
 echo "Producing final blocks..."
 while true; do
-    remaining_response=$(curl -s -X POST http://localhost:8080/block/produce --max-time 10)
+    remaining_response=$(curl -s -X POST http://localhost:8080/block/produce --max-time 30)
     if echo "$remaining_response" | jq -e '.error' > /dev/null 2>&1; then
         echo "No more transactions to process"
         break
@@ -293,12 +303,13 @@ BLOCK_PRODUCTION_END_TIME=$(date +%s)
 
 # Quick final state check
 echo ""
-echo "Final Account Balances:"
-echo "----------------------"
-curl -s http://localhost:8080/state/alice --max-time 3 | jq -r '"Alice:   " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-curl -s http://localhost:8080/state/bob --max-time 3 | jq -r '"Bob:     " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-curl -s http://localhost:8080/state/charlie --max-time 3 | jq -r '"Charlie: " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
-curl -s http://localhost:8080/state/diana --max-time 3 | jq -r '"Diana:   " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
+echo "Final Account Balances (first 5 users):"
+echo "--------------------------------------"
+for i in {1..5}; do
+    user="user$i"
+    curl -s http://localhost:8080/state/$user --max-time 10 | jq -r '"'$user': " + .balance + " (nonce: " + (.nonce | tostring) + ")"'
+done
+echo "... (and 15 more users)"
 
 # Analyze execution failures (from newer script)
 analyze_execution_failures

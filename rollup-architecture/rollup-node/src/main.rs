@@ -75,7 +75,7 @@ async fn main() -> anyhow::Result<()> {
     let app_state = AppState {
         inner: Arc::new(AppStateInner::new()),
         tx_queue: Arc::new(Mutex::new(Vec::new())),
-        transactions_per_block: 100, // Default: 100 transactions per block
+        transactions_per_block: 1000, // Default: 1000 transactions per block
         blob_builder: Arc::new(Mutex::new(BlobBuilder::new(blob_config))),
     };
 

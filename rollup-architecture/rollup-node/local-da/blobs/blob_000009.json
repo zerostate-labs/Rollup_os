@@ -1,0 +1,14 @@
+{
+  "blob_id": "blob_000009",
+  "block_numbers": [
+    46,
+    47,
+    48,
+    49,
+    50
+  ],
+  "transaction_count": 5000,
+  "namespace_id": "0000000000000000",
+  "commitment": "3300f6b8734ac72ee023be61e7d182e27df8051fb4237982b66c92dcf89a2592",
+  "created_at": 1757446170
+}
