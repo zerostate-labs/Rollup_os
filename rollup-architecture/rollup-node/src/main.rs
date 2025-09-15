@@ -20,6 +20,7 @@ mod oracle_adapter;
 mod proof_adapter;
 mod state;
 mod blob_builder;
+mod receipt;
 
 use state::State as AppStateInner;
 use blob_builder::{BlobBuilder, BlobConfig};
@@ -51,11 +52,13 @@ struct ProduceResp {
     block_number: u64,
     pre_root: String,
     post_root: String,
+    receipts_root: String,
     blob_path: String,
     blob_hash: String,
     proof_len: usize,
     proof_hex: String,
     proof_verified: bool,
+    execution_stats: receipt::ExecutionStats,
 }
 
 #[tokio::main]
@@ -88,7 +91,10 @@ async fn main() -> anyhow::Result<()> {
     // Build router
     let router = Router::new()
         .route("/tx", post(post_tx))
+        .route("/init_account", post(init_account))
         .route("/block/produce", post(produce_block))
+        .route("/block/:block_number/receipts", get(get_block_receipts))
+        .route("/block/:block_number/stats", get(get_block_stats))
         .route("/blob/create", post(create_blobs))
         .route("/blob/create-from-blocks", post(create_blobs_from_blocks))
         .route("/blob/load-blocks", post(load_blocks_from_storage))
@@ -132,6 +138,33 @@ async fn get_state(
         "balance": acct.balance.to_string(),
     });
     (StatusCode::OK, Json(body))
+}
+
+#[derive(Deserialize)]
+struct InitAccountRequest {
+    address: String,
+    balance: String,
+}
+
+/// POST /init_account
+async fn init_account(
+    AxState(app_state): AxState<AppState>,
+    Json(request): Json<InitAccountRequest>,
+) -> impl IntoResponse {
+    if let Ok(balance) = request.balance.parse::<u128>() {
+        app_state.inner.credit(&request.address, balance);
+        let response = serde_json::json!({
+            "message": "Account initialized",
+            "address": request.address,
+            "balance": balance
+        });
+        (StatusCode::OK, Json(response))
+    } else {
+        let response = serde_json::json!({
+            "error": "Invalid balance format"
+        });
+        (StatusCode::BAD_REQUEST, Json(response))
+    }
 }
 
 #[derive(Deserialize)]
@@ -185,6 +218,45 @@ async fn set_blocks_per_blob(
     (StatusCode::OK, Json(body))
 }
 
+async fn get_block_receipts(
+    AxState(app_state): AxState<AppState>,
+    Path(block_number): Path<u64>,
+) -> impl IntoResponse {
+    match app_state.inner.get_block_receipts(block_number) {
+        Some(receipts) => {
+            let response = serde_json::json!({
+                "block_number": block_number,
+                "receipts": receipts,
+                "count": receipts.len()
+            });
+            (StatusCode::OK, Json(response))
+        }
+        None => {
+            let response = serde_json::json!({
+                "error": "Block not found",
+                "block_number": block_number
+            });
+            (StatusCode::NOT_FOUND, Json(response))
+        }
+    }
+}
+
+async fn get_block_stats(
+    AxState(app_state): AxState<AppState>,
+    Path(block_number): Path<u64>,
+) -> impl IntoResponse {
+    let stats = app_state.inner.get_execution_stats(block_number);
+    let receipts_root = app_state.inner.get_receipts_root(block_number);
+    
+    let response = serde_json::json!({
+        "block_number": block_number,
+        "receipts_root": receipts_root,
+        "execution_stats": stats
+    });
+    
+    (StatusCode::OK, Json(response))
+}
+
 /// POST /block/produce
 /// Executes queued transactions, writes a DA blob (local file), generates a mock proof,
 /// and optionally calls a settlement submit helper script (if present).
@@ -228,19 +300,44 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         drained
     };
 
-    // Apply transactions
-    for t in &txs {
+    // Execute transactions with detailed tracking
+    let mut receipts = Vec::new();
+    for (i, t) in txs.iter().enumerate() {
         if let Ok(amount) = t.amount.parse::<u128>() {
-            if let Err(e) = app_state.inner.apply_transfer(&t.from, &t.to, amount, t.nonce) {
-                tracing::warn!("tx failed: {:?} err={}", t, e);
-            }
+            let receipt = app_state.inner.execute_transaction(
+                &t.from,
+                &t.to,
+                amount,
+                t.nonce,
+                next_block,
+                i,
+                21000, // Standard gas limit
+            );
+            receipts.push(receipt);
         } else {
-            tracing::warn!("invalid amount in tx: {:?}", t);
+            // Create a receipt for invalid amount
+            let receipt = receipt::TransactionReceipt::new(
+                app_state.inner.calculate_tx_hash(&t.from, &t.to, 0, t.nonce),
+                t.from.clone(),
+                t.to.clone(),
+                0,
+                t.nonce,
+                receipt::TxStatus::InvalidAmount,
+                21000,
+                21000,
+                next_block,
+                i,
+            );
+            receipts.push(receipt);
         }
     }
 
     // Commit block and compute post root
     let (_bn, post_root) = app_state.inner.commit_block(next_block);
+
+    // Get receipts root and execution stats
+    let receipts_root = app_state.inner.get_receipts_root(next_block);
+    let execution_stats = app_state.inner.get_execution_stats(next_block);
 
     // Oracle commit (mock)
     let oracle_commit = oracle_adapter::current_oracle_commit();
@@ -308,11 +405,12 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         }
     };
 
-    let proof = proof_adapter::generate_proof(&prev_root, &post_root, &blob_hash, &oracle_commit);
+    let proof = proof_adapter::generate_proof(&prev_root, &post_root, &receipts_root, &blob_hash, &oracle_commit);
     let proof_verified = proof_adapter::verify_proof_unified(
         &proof,
         &prev_root,
         &post_root,
+        &receipts_root,
         &blob_hash,
         &oracle_commit,
     );
@@ -345,11 +443,13 @@ async fn produce_block(AxState(app_state): AxState<AppState>) -> impl IntoRespon
         block_number: next_block,
         pre_root: prev_root,
         post_root,
+        receipts_root,
         blob_path,
         blob_hash,
         proof_len: proof.len(),
         proof_hex: hex::encode(&proof),
         proof_verified,
+        execution_stats,
     };
 
     (StatusCode::OK, Json(serde_json::to_value(resp).unwrap()))

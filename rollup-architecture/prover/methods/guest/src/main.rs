@@ -7,6 +7,7 @@ risc0_zkvm::guest::entry!(main);
 pub struct PublicInputs {
     pub prev_root: String,
     pub post_root: String,
+    pub receipts_root: String,
     pub blob_hash: String,
     pub oracle_commit: String,
 }
