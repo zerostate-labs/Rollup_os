@@ -1,0 +1,77 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo lock files (uncomment if you want to ignore them)
+# Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Risc0 specific
+*.bin
+*.hex
+proof_*.json
+receipt_*.json
+
+# Build outputs
+*.wasm
+*.so
+*.dylib
+*.dll
+
+# Coverage reports
+tarpaulin-report.html
+lcov.info
+
+# Profiling data
+*.prof
+perf.data*
+
+# Backup files
+*.bak
+*.backup
+
+# Node / Hardhat
+node_modules/
+artifacts/
+cache/
+coverage/
+typechain/
+typechain-types/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Hardhat deployments / ignition / broadcasts
+deployments/
+ignition/
+broadcast/
+
+# Package manager logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
