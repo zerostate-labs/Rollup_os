@@ -412,7 +412,7 @@ The comprehensive test suite validates:
 - **Error Classification**: Categorize failure types
 - **Proof Verification**: Validate ZK proof correctness
 
-## Future Enhancements
+<!-- ## Future Enhancements
 
 ### **Planned Features**
 1. **Celestia Integration**: Real data availability network
@@ -425,7 +425,7 @@ The comprehensive test suite validates:
 1. **Parallel Execution**: Multi-threaded transaction processing
 2. **Proof Batching**: Multiple blocks in single proof
 3. **State Compression**: More efficient state representation
-4. **Caching**: Optimized data access patterns
+4. **Caching**: Optimized data access patterns -->
 
 ---
 
