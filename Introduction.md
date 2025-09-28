@@ -86,9 +86,9 @@ Zero-knowledge proof generation using Risc0 ZKVM:
 - **Pluggable data availability** backends
 - **Extensible state management**
 
-## Technology Stack
+<!-- ## Technology Stack -->
 
-### **Backend (Rust)**
+<!-- ### **Backend (Rust)**
 - **Axum**: High-performance web framework
 - **Tokio**: Async runtime for concurrent processing
 - **Serde**: Serialization for data exchange
@@ -103,7 +103,7 @@ Zero-knowledge proof generation using Risc0 ZKVM:
 ### **Data Availability**
 - **Local Storage**: Development and testing
 - **Celestia Integration**: Production data availability
-- **JSON Serialization**: Human-readable data format
+- **JSON Serialization**: Human-readable data format -->
 
 ## Getting Started
 
