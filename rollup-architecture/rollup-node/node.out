@@ -1,0 +1,306 @@
+   Compiling methods v0.1.0 (/mnt/e/zerostate_rollup/rollup-architecture/prover/methods)
+   Compiling prover_host v0.1.0 (/mnt/e/zerostate_rollup/rollup-architecture/prover/host)
+   Compiling rollup-node v0.1.0 (/mnt/e/zerostate_rollup/rollup-architecture/rollup-node)
+warning: unused import: `Serialize`
+ --> src/celestia_client.rs:2:26
+  |
+2 | use serde::{Deserialize, Serialize};
+  |                          ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `std::fs`
+   --> src/celestia_client.rs:180:9
+    |
+180 |     use std::fs;
+    |         ^^^^^^^
+
+warning: unused import: `std::path::Path`
+   --> src/celestia_client.rs:181:9
+    |
+181 |     use std::path::Path;
+    |         ^^^^^^^^^^^^^^^
+
+warning: unused import: `Hash`
+   --> src/celestia_client.rs:193:25
+    |
+193 |         use std::hash::{Hash, Hasher};
+    |                         ^^^^
+
+warning: unused import: `Hash`
+   --> src/celestia_client.rs:215:25
+    |
+215 |         use std::hash::{Hash, Hasher};
+    |                         ^^^^
+
+warning: unused variable: `stdout`
+   --> src/celestia_client.rs:152:13
+    |
+152 |         let stdout = String::from_utf8_lossy(&output.stdout);
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_stdout`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `i`
+   --> src/main.rs:863:9
+    |
+863 |     for i in 0..count {
+    |         ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: unused variable: `prev_root`
+  --> src/proof_adapter.rs:61:5
+   |
+61 |     prev_root: &str,
+   |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_prev_root`
+
+warning: unused variable: `post_root`
+  --> src/proof_adapter.rs:62:5
+   |
+62 |     post_root: &str,
+   |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_post_root`
+
+warning: unused variable: `receipts_root`
+  --> src/proof_adapter.rs:63:5
+   |
+63 |     receipts_root: &str,
+   |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receipts_root`
+
+warning: unused variable: `blob_hash`
+  --> src/proof_adapter.rs:64:5
+   |
+64 |     blob_hash: &str,
+   |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_blob_hash`
+
+warning: unused variable: `oracle_commit`
+  --> src/proof_adapter.rs:65:5
+   |
+65 |     oracle_commit: &str,
+   |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_oracle_commit`
+
+warning: function `get_oracle_data` is never used
+  --> src/oracle_adapter.rs:44:8
+   |
+44 | pub fn get_oracle_data() -> OracleData {
+   |        ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: methods `clear` and `get_block_numbers` are never used
+   --> src/blob_builder.rs:183:12
+    |
+ 54 | impl BlobBuilder {
+    | ---------------- methods in this implementation
+...
+183 |     pub fn clear(&mut self) {
+    |            ^^^^^
+...
+188 |     pub fn get_block_numbers(&self) -> Vec<u64> {
+    |            ^^^^^^^^^^^^^^^^^
+
+warning: function `load_blob` is never used
+   --> src/blob_builder.rs:221:12
+    |
+221 |     pub fn load_blob<P: AsRef<Path>>(dir: P, blob_id: &str) -> Result<(CelestiaBlob, BlobMetadata)> {
+    |            ^^^^^^^^^
+
+warning: method `serialize` is never used
+   --> src/receipt.rs:113:12
+    |
+ 58 | impl TransactionReceipt {
+    | ----------------------- method in this implementation
+...
+113 |     pub fn serialize(&self) -> Vec<u8> {
+    |            ^^^^^^^^^
+
+warning: method `clear_block_receipts` is never used
+   --> src/receipt.rs:207:12
+    |
+124 | impl ReceiptsManager {
+    | -------------------- method in this implementation
+...
+207 |     pub fn clear_block_receipts(&mut self, block_number: u64) {
+    |            ^^^^^^^^^^^^^^^^^^^^
+
+warning: method `success_rate` is never used
+   --> src/receipt.rs:222:12
+    |
+221 | impl ExecutionStats {
+    | ------------------- method in this implementation
+222 |     pub fn success_rate(&self) -> f64 {
+    |            ^^^^^^^^^^^^
+
+warning: struct `BlockCommitment` is never constructed
+   --> src/receipt.rs:233:12
+    |
+233 | pub struct BlockCommitment {
+    |            ^^^^^^^^^^^^^^^
+
+warning: associated items `new` and `hash` are never used
+   --> src/receipt.rs:243:12
+    |
+242 | impl BlockCommitment {
+    | -------------------- associated items in this implementation
+243 |     pub fn new(
+    |            ^^^
+...
+262 |     pub fn hash(&self) -> String {
+    |            ^^^^
+
+warning: field `node_url` is never read
+  --> src/celestia_client.rs:10:9
+   |
+ 9 | pub struct CelestiaConfig {
+   |            -------------- field in this struct
+10 |     pub node_url: String,
+   |         ^^^^^^^^
+   |
+   = note: `CelestiaConfig` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: struct `CelestiaResponse` is never constructed
+  --> src/celestia_client.rs:33:12
+   |
+33 | pub struct CelestiaResponse {
+   |            ^^^^^^^^^^^^^^^^
+
+warning: function `prepare_blob_data` is never used
+   --> src/celestia_client.rs:184:12
+    |
+184 |     pub fn prepare_blob_data(blob_data: &[u8]) -> Result<Vec<u8>> {
+    |            ^^^^^^^^^^^^^^^^^
+
+warning: function `generate_namespace_id` is never used
+   --> src/celestia_client.rs:213:12
+    |
+213 |     pub fn generate_namespace_id() -> String {
+    |            ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `rollup-node` (bin "rollup-node") generated 24 warnings (run `cargo fix --bin "rollup-node"` to apply 5 suggestions)
+    Finished `release` profile [optimized] target(s) in 45.74s
+     Running `target/release/rollup-node`
+2025-10-14T16:38:09.598953Z  INFO rollup_node: Rollup node listening on http://127.0.0.1:8080
+2025-10-14T16:38:24.015380Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:38:24.031546Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2025-10-14T16:38:38.731530Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:38:38.732926Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:38:53.221778Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:38:53.223102Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:39:07.791159Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:39:07.793158Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:39:21.398357Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:39:21.400133Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:39:33.938305Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:39:33.939410Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:39:47.228079Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:39:47.229258Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:40:00.714157Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:40:00.715344Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:40:13.348796Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:40:13.350242Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:40:25.997004Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:40:25.998330Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:40:37.244172Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:40:37.245189Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:40:49.387328Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:40:49.388799Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:41:01.729691Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:41:01.730962Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:41:13.569191Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:41:13.570597Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:41:26.603566Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:41:26.604693Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:41:39.104887Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:41:39.106292Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:41:52.658504Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:41:52.659628Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:42:07.737836Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:42:07.739760Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:42:20.321712Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:42:20.322912Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:42:32.678373Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:42:32.680611Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:42:44.123586Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:42:44.125090Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:42:56.692910Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:42:56.694297Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:43:09.166585Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:43:09.167729Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:43:21.524367Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:43:21.526067Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)
+2025-10-14T16:43:32.430498Z DEBUG risc0_zkvm::host::client::prove: version: 3.0.3
+2025-10-14T16:43:32.432086Z DEBUG risc0_zkvm::host::client::prove::external: Launching r0vm
+
+thread 'tokio-runtime-worker' panicked at src/proof_adapter.rs:50:49:
+prover failed: No such file or directory (os error 2)

@@ -21,9 +21,11 @@ mod proof_adapter;
 mod state;
 mod blob_builder;
 mod receipt;
+mod celestia_client;
 
 use state::State as AppStateInner;
 use blob_builder::{BlobBuilder, BlobConfig};
+use celestia_client::{CelestiaClient, CelestiaConfig};
 
 #[derive(Clone)]
 struct AppState {
@@ -31,6 +33,7 @@ struct AppState {
     tx_queue: Arc<Mutex<Vec<Tx>>>,
     transactions_per_block: u64,
     blob_builder: Arc<Mutex<BlobBuilder>>,
+    celestia_client: Arc<CelestiaClient>,
     // Optionally: settlement config (contract address, rpc URL) could be here
 }
 
@@ -75,11 +78,22 @@ async fn main() -> anyhow::Result<()> {
         share_version: 0,
     };
     
+    // Initialize Celestia client
+    let celestia_config = CelestiaConfig {
+        node_url: "https://rpc-mocha.pops.one:443".to_string(),
+        chain_id: "mocha-4".to_string(),
+        wallet_name: "validator".to_string(),
+        namespace_id: "7a65726f7374617465ab".to_string(), // 10 bytes for namespace version 0 ("zerostate" + padding)
+        gas_fees: "500utia".to_string(),
+        rpc_url: "https://rpc-mocha.pops.one:443".to_string(),
+    };
+    
     let app_state = AppState {
         inner: Arc::new(AppStateInner::new()),
         tx_queue: Arc::new(Mutex::new(Vec::new())),
         transactions_per_block: 1000, // Default: 1000 transactions per block
         blob_builder: Arc::new(Mutex::new(BlobBuilder::new(blob_config))),
+        celestia_client: Arc::new(CelestiaClient::new(celestia_config)),
     };
 
     // Seed demo accounts (Phase 0 convenience)
@@ -102,6 +116,12 @@ async fn main() -> anyhow::Result<()> {
         .route("/state/:addr", get(get_state))
         .route("/config/tx-per-block", post(set_tx_per_block))
         .route("/config/blocks-per-blob", post(set_blocks_per_blob))
+        // Celestia integration endpoints
+        .route("/celestia/submit-blob", post(submit_blob_to_celestia))
+        .route("/celestia/submit-bulk", post(submit_bulk_blobs_to_celestia))
+        .route("/celestia/balance", get(get_celestia_balance))
+        .route("/celestia/verify/:tx_hash", get(verify_celestia_tx))
+        .route("/celestia/test-blobs", post(create_test_blobs))
         .with_state(app_state.clone());
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -634,4 +654,221 @@ async fn list_blobs(
     });
 
     (StatusCode::OK, Json(response))
+}
+
+// ===== CELESTIA INTEGRATION ENDPOINTS =====
+
+#[derive(Deserialize)]
+struct SubmitBlobRequest {
+    data: String, // Hex-encoded data
+}
+
+#[derive(Serialize)]
+struct SubmitBlobResponse {
+    success: bool,
+    tx_hash: Option<String>,
+    error: Option<String>,
+}
+
+/// POST /celestia/submit-blob - Submit a single blob to Celestia
+async fn submit_blob_to_celestia(
+    AxState(app_state): AxState<AppState>,
+    Json(request): Json<SubmitBlobRequest>,
+) -> impl IntoResponse {
+    // Remove 0x prefix if present
+    let hex_data = if request.data.starts_with("0x") {
+        &request.data[2..]
+    } else {
+        &request.data
+    };
+    
+    let data = match hex::decode(hex_data) {
+        Ok(data) => data,
+        Err(e) => {
+            return (StatusCode::BAD_REQUEST, Json(SubmitBlobResponse {
+                success: false,
+                tx_hash: None,
+                error: Some(format!("Invalid hex data: {}", e)),
+            }));
+        }
+    };
+
+    match app_state.celestia_client.submit_blob(&data).await {
+        Ok(tx_hash) => {
+            (StatusCode::OK, Json(SubmitBlobResponse {
+                success: true,
+                tx_hash: Some(tx_hash),
+                error: None,
+            }))
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(SubmitBlobResponse {
+                success: false,
+                tx_hash: None,
+                error: Some(format!("Failed to submit blob: {}", e)),
+            }))
+        }
+    }
+}
+
+#[derive(Deserialize)]
+struct SubmitBulkRequest {
+    blobs: Vec<String>, // Array of hex-encoded data
+    delay_ms: Option<u64>, // Delay between submissions
+}
+
+#[derive(Serialize)]
+struct SubmitBulkResponse {
+    success: bool,
+    tx_hashes: Vec<String>,
+    failed_count: usize,
+    error: Option<String>,
+}
+
+/// POST /celestia/submit-bulk - Submit multiple blobs to Celestia
+async fn submit_bulk_blobs_to_celestia(
+    AxState(app_state): AxState<AppState>,
+    Json(request): Json<SubmitBulkRequest>,
+) -> impl IntoResponse {
+    let mut blob_data = Vec::new();
+    
+    for (i, hex_data) in request.blobs.iter().enumerate() {
+        // Remove 0x prefix if present
+        let clean_hex = if hex_data.starts_with("0x") {
+            &hex_data[2..]
+        } else {
+            hex_data
+        };
+        
+        match hex::decode(clean_hex) {
+            Ok(data) => blob_data.push(data),
+            Err(e) => {
+                return (StatusCode::BAD_REQUEST, Json(SubmitBulkResponse {
+                    success: false,
+                    tx_hashes: vec![],
+                    failed_count: request.blobs.len(),
+                    error: Some(format!("Invalid hex data at index {}: {}", i, e)),
+                }));
+            }
+        }
+    }
+
+    let delay_ms = request.delay_ms.unwrap_or(1000); // Default 1 second delay
+    
+    match app_state.celestia_client.submit_blobs_bulk(blob_data, delay_ms).await {
+        Ok(tx_hashes) => {
+            let failed_count = request.blobs.len() - tx_hashes.len();
+            (StatusCode::OK, Json(SubmitBulkResponse {
+                success: true,
+                tx_hashes,
+                failed_count,
+                error: None,
+            }))
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(SubmitBulkResponse {
+                success: false,
+                tx_hashes: vec![],
+                failed_count: request.blobs.len(),
+                error: Some(format!("Failed to submit blobs: {}", e)),
+            }))
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct BalanceResponse {
+    balance: String,
+    address: String,
+}
+
+/// GET /celestia/balance - Check Celestia wallet balance
+async fn get_celestia_balance(
+    AxState(app_state): AxState<AppState>,
+) -> impl IntoResponse {
+    match app_state.celestia_client.check_balance().await {
+        Ok(balance_info) => {
+            let address = match app_state.celestia_client.get_wallet_address() {
+                Ok(addr) => addr,
+                Err(_) => "unknown".to_string(),
+            };
+            
+            (StatusCode::OK, Json(BalanceResponse {
+                balance: balance_info,
+                address,
+            }))
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(BalanceResponse {
+                balance: format!("Error: {}", e),
+                address: "unknown".to_string(),
+            }))
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct VerifyResponse {
+    verified: bool,
+    tx_hash: String,
+    error: Option<String>,
+}
+
+/// GET /celestia/verify/:tx_hash - Verify a Celestia transaction
+async fn verify_celestia_tx(
+    AxState(app_state): AxState<AppState>,
+    Path(tx_hash): Path<String>,
+) -> impl IntoResponse {
+    match app_state.celestia_client.verify_blob(&tx_hash).await {
+        Ok(verified) => {
+            (StatusCode::OK, Json(VerifyResponse {
+                verified,
+                tx_hash,
+                error: None,
+            }))
+        }
+        Err(e) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(VerifyResponse {
+                verified: false,
+                tx_hash,
+                error: Some(format!("Failed to verify transaction: {}", e)),
+            }))
+        }
+    }
+}
+
+#[derive(Deserialize)]
+struct TestBlobsRequest {
+    count: Option<usize>,
+    size_bytes: Option<usize>,
+}
+
+#[derive(Serialize)]
+struct TestBlobsResponse {
+    success: bool,
+    created_blobs: Vec<String>, // Hex-encoded blob data
+    error: Option<String>,
+}
+
+/// POST /celestia/test-blobs - Create test blobs for stress testing
+async fn create_test_blobs(
+    AxState(_app_state): AxState<AppState>,
+    Json(request): Json<TestBlobsRequest>,
+) -> impl IntoResponse {
+    let count = request.count.unwrap_or(10);
+    let size_bytes = request.size_bytes.unwrap_or(100);
+    
+    let mut blobs = Vec::new();
+    
+    for i in 0..count {
+        let blob_data = celestia_client::utils::create_test_blob(size_bytes);
+        let hex_data = format!("0x{}", hex::encode(&blob_data));
+        blobs.push(hex_data);
+    }
+    
+    (StatusCode::OK, Json(TestBlobsResponse {
+        success: true,
+        created_blobs: blobs,
+        error: None,
+    }))
 }
