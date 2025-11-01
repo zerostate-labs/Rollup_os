@@ -5,7 +5,6 @@ A modular **TowerABCI-based rollup** architecture featuring:
 - **Ethereum Settlement** with smart contracts
 - **Celestia Data Availability**
 - **ZK Proof System** using SP1/RiscZero
-- **Oracle Integration** for external data feeds
 - **Bridge Layer** for cross-chain commitments
 - **Developer Tooling** for local, testnet, and mainnet deployments
 
