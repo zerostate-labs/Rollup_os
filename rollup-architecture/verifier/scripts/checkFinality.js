@@ -45,31 +45,38 @@ async function checkFinality(blockTag = "latest") {
 /**
  * Wait for a block to be finalized
  * @param {string|number} blockNumber - Block number to wait for
- * @param {number} maxWaitSeconds - Maximum time to wait (default: 900 = 15 minutes)
+ * @param {number} maxWaitSeconds - Maximum time to wait (default: 1200 = 20 minutes)
  * @param {number} pollIntervalSeconds - How often to check (default: 12 seconds)
  */
-async function waitForFinality(blockNumber, maxWaitSeconds = 900, pollIntervalSeconds = 12) {
+async function waitForFinality(blockNumber, maxWaitSeconds = 1200, pollIntervalSeconds = 12) {
   const startTime = Date.now();
   const maxWaitMs = maxWaitSeconds * 1000;
   const pollIntervalMs = pollIntervalSeconds * 1000;
   
   console.log(`Waiting for block ${blockNumber} to be finalized...`);
-  console.log(`Max wait time: ${maxWaitSeconds}s, polling every ${pollIntervalSeconds}s`);
+  console.log(`Max wait time: ${maxWaitSeconds}s (${Math.floor(maxWaitSeconds / 60)} minutes), polling every ${pollIntervalSeconds}s`);
   
+  let checkCount = 0;
   while (Date.now() - startTime < maxWaitMs) {
     try {
       const result = await checkFinality(blockNumber);
+      checkCount++;
       
       if (result.isFinalized) {
         console.log(`Block ${blockNumber} is now finalized!`);
         console.log(`   Finalized block: ${result.finalizedBlockNumber}`);
         console.log(`   Finalized hash: ${result.finalizedBlockHash}`);
+        console.log(`   Total checks: ${checkCount}, elapsed time: ${Math.floor((Date.now() - startTime) / 1000)}s`);
         return result;
       }
       
-      console.log(`Block ${blockNumber} not yet finalized. Current finalized: ${result.finalizedBlockNumber} (${result.blocksBehind} blocks behind)`);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const elapsedMinutes = Math.floor(elapsed / 60);
+      const elapsedSeconds = elapsed % 60;
+      console.log(`[${elapsedMinutes}m ${elapsedSeconds}s] Block ${blockNumber} not yet finalized. Current finalized: ${result.finalizedBlockNumber} (${result.blocksBehind} blocks behind)`);
     } catch (error) {
       console.error(`Error checking finality: ${error.message}`);
+      // Continue waiting even on error (might be temporary network issue)
     }
     
     await new Promise(resolve => setTimeout(resolve, pollIntervalMs));

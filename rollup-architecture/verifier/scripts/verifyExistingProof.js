@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  const contractAddr = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+  const contractAddr = process.env.SETTLEMENT_VERIFIER_ADDRESS || "0xFEE73AD2904b90C53Eb5979581c975BaBFa836ca";
   
   const proofPath = path.join(__dirname, "../../rollup-node/local-da/proof_block_1.hex");
   const proofHex = "0x" + fs.readFileSync(proofPath, "utf8").trim();
