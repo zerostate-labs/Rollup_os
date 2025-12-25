@@ -147,11 +147,65 @@ fi
 print_step "Step 1: Starting rollup node with prover..."
 echo "Prebuilding rollup node (prover dev mode) to avoid startup timeout..."
 cd /mnt/e/zerostate_rollup/rollup-architecture/rollup-node
-RISC0_DEV_MODE=1 cargo build --release --features prover >/dev/null 2>&1 || true
+
+# Check if binary already exists and is recent
+BINARY_PATH="target/release/rollup-node"
+NEEDS_BUILD=true
+if [ -f "$BINARY_PATH" ]; then
+    # Check if binary is newer than source files (simple check)
+    BINARY_AGE=$(stat -c %Y "$BINARY_PATH" 2>/dev/null || stat -f %m "$BINARY_PATH" 2>/dev/null || echo "0")
+    SOURCE_AGE=$(find src -type f -name "*.rs" -exec stat -c %Y {} \; 2>/dev/null | sort -n | tail -1 || echo "0")
+    if [ "$BINARY_AGE" -gt "$SOURCE_AGE" ]; then
+        echo "Binary exists and appears up-to-date, skipping build..."
+        NEEDS_BUILD=false
+    fi
+fi
+
+# Build if needed
+if [ "$NEEDS_BUILD" = true ]; then
+    echo "Building rollup node (this may take several minutes, especially for RISC0 prover)..."
+    echo "  (Build output will be shown - RISC0 compilation can take 5-15 minutes)"
+    
+    # Build with visible output so user can see progress
+    # Use timeout to prevent infinite hangs, but allow enough time (30 minutes)
+    if command -v timeout > /dev/null 2>&1; then
+        BUILD_OUTPUT=$(timeout 1800 RISC0_DEV_MODE=1 cargo build --release --features prover 2>&1)
+        BUILD_EXIT_CODE=$?
+    else
+        BUILD_OUTPUT=$(RISC0_DEV_MODE=1 cargo build --release --features prover 2>&1)
+        BUILD_EXIT_CODE=$?
+    fi
+    
+    if [ $BUILD_EXIT_CODE -eq 124 ]; then
+        print_error "Build timed out after 30 minutes. This may indicate a compilation issue."
+        echo "Build output (last 50 lines):"
+        echo "$BUILD_OUTPUT" | tail -n 50
+        exit 1
+    elif [ $BUILD_EXIT_CODE -ne 0 ]; then
+        print_error "Build failed with exit code $BUILD_EXIT_CODE"
+        echo "Build output (last 100 lines):"
+        echo "$BUILD_OUTPUT" | tail -n 100
+        exit 1
+    else
+        print_success "Build completed successfully"
+        # Show last few lines to confirm completion
+        echo "$BUILD_OUTPUT" | tail -n 5
+    fi
+else
+    print_success "Using existing binary"
+fi
 
 echo "Starting rollup node (prover dev mode)..."
-RISC0_DEV_MODE=1 RUST_LOG=info RISC0_INFO=1 cargo run --release --features prover > node.out 2>&1 &
-NODE_PID=$!
+# Now run the already-built binary directly instead of cargo run to avoid recompilation
+if [ -f "$BINARY_PATH" ]; then
+    RISC0_DEV_MODE=1 RUST_LOG=info RISC0_INFO=1 "$BINARY_PATH" > node.out 2>&1 &
+    NODE_PID=$!
+else
+    # Fallback to cargo run if binary doesn't exist (shouldn't happen)
+    print_warning "Binary not found, using cargo run (will compile again)..."
+    RISC0_DEV_MODE=1 RUST_LOG=info RISC0_INFO=1 cargo run --release --features prover > node.out 2>&1 &
+    NODE_PID=$!
+fi
 
 # Wait for node to start
 print_step "Waiting for rollup node to start..."
@@ -702,6 +756,10 @@ if [ "$total_blobs" -gt 0 ]; then
         data_hex=$(echo -n "$blob_data" | xxd -p -c 256)
         
         # Submit to Celestia
+        # NOTE: celestia-appd may occasionally fail (network, mempool, gas estimations).
+        # Under 'set -e', a non-zero exit would abort the entire script. We temporarily
+        # disable 'set -e' around this call so we can handle failures gracefully.
+        set +e
         CELESTIA_OUTPUT=$(celestia-appd tx blob PayForBlobs \
             $NAMESPACE \
             $data_hex \
@@ -711,14 +769,18 @@ if [ "$total_blobs" -gt 0 ]; then
             --gas auto \
             --fees $FEES \
             -y 2>&1)
+        CELESTIA_EXIT_CODE=$?
+        set -e
         
-        if echo "$CELESTIA_OUTPUT" | grep -q "txhash:"; then
+        if [ $CELESTIA_EXIT_CODE -eq 0 ] && echo "$CELESTIA_OUTPUT" | grep -q "txhash:"; then
             TX_HASH=$(echo "$CELESTIA_OUTPUT" | grep "txhash:" | awk '{print $2}')
             echo "   ✅ Success! TX: $TX_HASH"
             successful_celestia_blobs=$((successful_celestia_blobs + 1))
             celestia_tx_hashes+=("$TX_HASH")
         else
-            echo "   ❌ Failed: $CELESTIA_OUTPUT"
+            echo "   ❌ Failed to submit blob $i (exit code: $CELESTIA_EXIT_CODE)"
+            echo "      Raw output:"
+            echo "$CELESTIA_OUTPUT" | tail -n 10 | sed 's/^/      /'
             failed_celestia_blobs=$((failed_celestia_blobs + 1))
         fi
         
@@ -911,6 +973,9 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
             echo "   Journal (state root): ${journal_hex:0:20}..."
             
             # Submit proof using verifyProof.js (which handles finality checking)
+            # Under 'set -e', a non-zero exit from hardhat would abort the whole script.
+            # Temporarily disable 'set -e' so we can collect errors and continue.
+            set +e
             SUBMIT_OUTPUT=$(cd "$VERIFIER_DIR" && \
                 SETTLEMENT_VERIFIER_ADDRESS="$SETTLEMENT_VERIFIER_ADDRESS" \
                 PROOF_HEX="$proof_hex" \
@@ -918,8 +983,8 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
                 $SKIP_FINALITY_CHECK_ENV \
                 $WAIT_FINALITY_ENV \
                 npx hardhat run scripts/verifyProof.js --network "$ETHEREUM_NETWORK" 2>&1)
-            
             SUBMIT_EXIT_CODE=$?
+            set -e
             
             # Check for success indicators
             if [ $SUBMIT_EXIT_CODE -eq 0 ] && (echo "$SUBMIT_OUTPUT" | grep -q "Proof verified!" || echo "$SUBMIT_OUTPUT" | grep -q "Transaction confirmed"); then
