@@ -847,68 +847,27 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
         
         # Initial finality check - verify Ethereum chain state before submitting
         if [ "$SKIP_FINALITY_CHECK" != "1" ]; then
-            print_step "Step 8.1: Checking Ethereum finality status on $ETHEREUM_NETWORK..."
-            echo "   (This ensures the L1 chain is in a stable state before proof submission)"
+            print_step "Step 8.1: Ensuring Ethereum finality on $ETHEREUM_NETWORK..."
+            echo "   (This ensures the L1 chain is stable. If WAIT_FOR_FINALITY=1, it will wait up to 20 mins)"
             
-            # Use timeout to prevent hanging, but allow enough time for the check
-            FINALITY_CHECK=""
-            FINALITY_EXIT_CODE=0
-            if command -v timeout > /dev/null 2>&1; then
-                FINALITY_CHECK=$(cd "$VERIFIER_DIR" && timeout 60 npx hardhat run scripts/checkFinality.js --network "$ETHEREUM_NETWORK" 2>&1) || FINALITY_EXIT_CODE=$?
-            else
-                FINALITY_CHECK=$(cd "$VERIFIER_DIR" && npx hardhat run scripts/checkFinality.js --network "$ETHEREUM_NETWORK" 2>&1) || FINALITY_EXIT_CODE=$?
-            fi
+            # Run finality check/wait - the script handles its own 20min timeout
+            # We use PIPESTATUS to get the exit code of npx hardhat, not tee
+            (cd "$VERIFIER_DIR" && export WAIT_FOR_FINALITY="$WAIT_FOR_FINALITY" && npx hardhat run scripts/checkFinality.js --network "$ETHEREUM_NETWORK") 2>&1 | tee /tmp/finality_check.log
+            FINALITY_EXIT_CODE=${PIPESTATUS[0]}
             
             if [ $FINALITY_EXIT_CODE -eq 0 ]; then
-                echo "$FINALITY_CHECK"
-                
-                # Extract finality status
-                if echo "$FINALITY_CHECK" | grep -q "NOT FINALIZED"; then
-                    # Extract blocks behind for better messaging
-                    BLOCKS_BEHIND=$(echo "$FINALITY_CHECK" | grep -oP 'Blocks Behind: \K[0-9]+' || echo "unknown")
-                    
-                    if [ "$WAIT_FOR_FINALITY" = "1" ]; then
-                        print_step "Waiting for Ethereum finality (this may take ~12.8 minutes on $ETHEREUM_NETWORK)..."
-                        echo "   Current blocks behind: $BLOCKS_BEHIND"
-                        estimated_wait=$(( (BLOCKS_BEHIND * 12 + 59) / 60 ))
-                        echo "   Estimated wait: ~${estimated_wait} minutes"
-                        echo "   Maximum wait time: 20 minutes (1200 seconds)"
-                        echo "   Polling every 12 seconds..."
-                        echo ""
-                        echo "   (This process will continue in the background. You can monitor progress.)"
-                        echo ""
-                        
-                        # Run finality wait with proper error handling - don't exit on error
-                        FINALITY_WAIT_EXIT_CODE=0
-                        BLOCK_TAG="latest" WAIT_FOR_FINALITY=1 \
-                            cd "$VERIFIER_DIR" && npx hardhat run scripts/checkFinality.js --network "$ETHEREUM_NETWORK" 2>&1 | tee /tmp/finality_wait.log || FINALITY_WAIT_EXIT_CODE=$?
-                        
-                        if [ $FINALITY_WAIT_EXIT_CODE -eq 0 ] && grep -q "is now finalized" /tmp/finality_wait.log 2>/dev/null; then
-                            print_success "Finality achieved - L1 chain is now stable"
-                        elif [ $FINALITY_WAIT_EXIT_CODE -ne 0 ]; then
-                            print_warning "Finality wait process exited with code $FINALITY_WAIT_EXIT_CODE"
-                            print_warning "This might indicate a network issue or timeout"
-                            print_warning "Proceeding with proof submission (verifyProof.js will check finality per proof)"
-                        else
-                            print_warning "Finality wait completed but block may not be finalized yet"
-                            print_warning "Proceeding with proof submission (verifyProof.js will check finality before each submission)"
-                        fi
-                    else
-                        print_warning "Latest block not finalized (${BLOCKS_BEHIND} blocks behind)"
-                        print_warning "Proceeding anyway (set WAIT_FOR_FINALITY=1 to wait for finality)"
-                        print_warning "Note: On $ETHEREUM_NETWORK, finality takes ~12.8 minutes after block production"
-                        print_warning "      Each proof submission will also check finality before submitting"
-                    fi
+                if grep -q "is now finalized" /tmp/finality_check.log 2>/dev/null || grep -q "Status: FINALIZED" /tmp/finality_check.log 2>/dev/null; then
+                    print_success "Finality achieved - L1 chain is stable ✅"
                 else
-                    print_success "Latest block is finalized - L1 chain is stable ✅"
+                    print_warning "Finality check completed but block might not be finalized"
                 fi
             else
-                print_warning "Finality check failed (exit code: $FINALITY_EXIT_CODE)"
-                print_warning "Proceeding with proof submission (verifyProof.js will check finality per proof)"
+                print_warning "Finality check/wait encountered an issue (exit code: $FINALITY_EXIT_CODE)"
+                echo "      Check /tmp/finality_check.log for details"
+                print_warning "Proceeding with proof submission anyway..."
             fi
         else
-            print_warning "Skipping initial finality check (SKIP_FINALITY_CHECK=1)"
-            print_warning "Note: verifyProof.js will still check finality before each submission unless disabled"
+            print_warning "Skipping finality check (SKIP_FINALITY_CHECK=1)"
         fi
         
         echo ""
@@ -954,20 +913,10 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
             # 2. Optionally wait for finality if WAIT_FOR_FINALITY=1 (but with shorter timeout per proof)
             # 3. Submit the proof
             # 4. Check finality of the transaction block after submission
-            SKIP_FINALITY_CHECK_ENV=""
-            if [ "$SKIP_FINALITY_CHECK" = "1" ]; then
-                SKIP_FINALITY_CHECK_ENV="SKIP_FINALITY_CHECK=1"
-            fi
             
             # For individual proof submissions, we don't wait as long (already waited initially)
             # Set WAIT_FOR_FINALITY=0 for per-proof submissions to avoid long waits
             # The initial wait above should be sufficient
-            WAIT_FINALITY_ENV=""
-            if [ "$WAIT_FOR_FINALITY" = "1" ]; then
-                # Don't wait again for each proof - we already waited initially
-                # Just check finality status
-                WAIT_FINALITY_ENV="WAIT_FOR_FINALITY=0"
-            fi
             
             echo "   Proof length: ${#proof_hex} chars"
             echo "   Journal (state root): ${journal_hex:0:20}..."
@@ -980,8 +929,8 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
                 SETTLEMENT_VERIFIER_ADDRESS="$SETTLEMENT_VERIFIER_ADDRESS" \
                 PROOF_HEX="$proof_hex" \
                 JOURNAL_HEX="$journal_hex" \
-                $SKIP_FINALITY_CHECK_ENV \
-                $WAIT_FINALITY_ENV \
+                SKIP_FINALITY_CHECK="${SKIP_FINALITY_CHECK:-0}" \
+                WAIT_FOR_FINALITY="0" \
                 npx hardhat run scripts/verifyProof.js --network "$ETHEREUM_NETWORK" 2>&1)
             SUBMIT_EXIT_CODE=$?
             set -e
@@ -1017,13 +966,21 @@ if [ "$ETHEREUM_SUBMISSION_ENABLED" -eq 1 ]; then
                 
                 successful_ethereum_proofs=$((successful_ethereum_proofs + 1))
             else
-                echo "   ❌ Proof submission failed"
+                echo "   ❌ Proof submission failed for block $block_num"
                 if [ $SUBMIT_EXIT_CODE -ne 0 ]; then
-                    echo "   Exit code: $SUBMIT_EXIT_CODE"
+                    echo "      Exit code: $SUBMIT_EXIT_CODE"
                 fi
-                echo "   Error details:"
-                echo "$SUBMIT_OUTPUT" | grep -iE "(error|failed|revert|unauthorized)" | head -n 5 | sed 's/^/      /' || echo "$SUBMIT_OUTPUT" | tail -n 10 | sed 's/^/      /'
+                echo "      Error Output (last 15 lines):"
+                echo "------------------------------------------------------------------------"
+                echo "$SUBMIT_OUTPUT" | tail -n 15 | sed 's/^/      /'
+                echo "------------------------------------------------------------------------"
                 failed_ethereum_proofs=$((failed_ethereum_proofs + 1))
+                
+                # If it's a relayer mismatch, we should probably stop as all others will fail too
+                if echo "$SUBMIT_OUTPUT" | grep -q "RELAYER MISMATCH"; then
+                    print_error "All subsequent submissions will fail due to relayer mismatch. Stopping Step 8.2."
+                    break
+                fi
             fi
             
             # Small delay between submissions to avoid rate limiting

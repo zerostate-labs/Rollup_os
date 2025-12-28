@@ -54,16 +54,22 @@ contract SettlementVerifier {
     /// @param proofId Unique identifier to prevent replay (e.g., keccak(proof||journal))
     /// @return true if verification succeeds
     function verifyProof(bytes calldata proof, bytes calldata journal, bytes32 proofId) external returns (bool) {
-        require(msg.sender == relayer, "unauthorized");
-        require(!consumedProofIds[proofId], "replay");
+        require(msg.sender == relayer, "SettlementVerifier: unauthorized relayer");
+        require(!consumedProofIds[proofId], "SettlementVerifier: proof already consumed");
 
         // Verify the proof against the journal using the external verifier
         // If verification fails, the external call MUST revert
         verifier.verify(proof, journal);
 
         // Derive state root from the journal (application-specific encoding)
-        // For Phase 0, we derive it as keccak(journal)
-        bytes32 stateRoot = keccak256(journal);
+        // If journal is 32 bytes, we assume it IS the state root
+        // Otherwise we hash it to get a commitment
+        bytes32 stateRoot;
+        if (journal.length == 32) {
+            stateRoot = bytes32(journal);
+        } else {
+            stateRoot = keccak256(journal);
+        }
 
         // Mark proof as consumed and update canonical root
         consumedProofIds[proofId] = true;

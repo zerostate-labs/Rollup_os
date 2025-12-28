@@ -1,101 +1,101 @@
-[2m2025-12-18T20:28:39.246693Z[0m [32m INFO[0m [2mrollup_node[0m[2m:[0m Rollup node listening on http://127.0.0.1:8080
-[2m2025-12-18T20:29:47.842975Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:29:48.091567Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:29:48.820056Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:29:48.820650Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:30:46.931870Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:30:46.933429Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:30:47.001138Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:30:47.001487Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:31:01.786904Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:31:01.790375Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:31:01.876964Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:31:01.877846Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:31:31.451282Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:31:31.452904Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:31:31.653145Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:31:31.654300Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:32:00.347499Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:32:00.351160Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:32:00.535023Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:32:00.535444Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:32:28.636939Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:32:28.638584Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:32:28.863470Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:32:28.864322Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:32:51.280554Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:32:51.282009Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:32:51.330672Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:32:51.330894Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:01.412485Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:01.413634Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:01.456494Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:01.456730Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:12.227397Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:12.228481Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:12.269161Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:12.269358Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:23.020069Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:23.021421Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:23.073385Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:23.073742Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:32.933275Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:32.934512Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:32.988281Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:32.988534Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:43.718465Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:43.719557Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:43.765661Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:43.765877Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:33:55.254254Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:33:55.255514Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:33:55.317983Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:33:55.318280Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:05.652440Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:05.653854Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:05.696603Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:05.696919Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:16.417741Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:16.418722Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:16.462242Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:16.462447Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:27.570749Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:27.571809Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:27.616618Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:27.616827Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:37.107267Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:37.108267Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:37.146137Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:37.146373Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:47.695061Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:47.696630Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:47.739872Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:47.740123Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:34:58.523564Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:34:58.524886Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:34:58.575029Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:34:58.575285Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:35:08.570779Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:35:08.571769Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:35:08.611960Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:35:08.612213Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:35:19.358615Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:35:19.359619Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:35:19.399707Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:35:19.399941Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:35:30.278190Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:35:30.279344Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:35:30.327148Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:35:30.327381Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:35:40.090292Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:35:40.091602Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:35:40.139249Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:35:40.139487Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:35:51.010232Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:35:51.011400Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:35:51.066395Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:35:51.066971Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
-[2m2025-12-18T20:36:27.589759Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
-[2m2025-12-18T20:36:27.596478Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
-[2m2025-12-18T20:36:28.038503Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
-[2m2025-12-18T20:36:28.041366Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:26:43.726268Z[0m [32m INFO[0m [2mrollup_node[0m[2m:[0m Rollup node listening on http://127.0.0.1:8080
+[2m2025-12-28T15:26:57.601540Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:26:57.618154Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:26:57.665041Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:26:57.665382Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:27:09.666841Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:27:09.667732Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:27:09.742883Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:27:09.743299Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:27:21.065648Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:27:21.067095Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:27:21.171084Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:27:21.171423Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:27:33.344439Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:27:33.346816Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:27:33.448981Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:27:33.449625Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:27:44.967125Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:27:44.968819Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:27:45.049305Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:27:45.049632Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:27:56.883622Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:27:56.884842Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:27:56.965833Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:27:56.966162Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:28:09.316469Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:28:09.318034Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:28:09.399013Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:28:09.399384Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:28:20.697560Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:28:20.698848Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:28:20.781962Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:28:20.782244Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:28:32.490403Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:28:32.492104Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:28:32.601558Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:28:32.601957Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:28:45.355818Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:28:45.356921Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:28:45.447188Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:28:45.447615Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:28:56.895086Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:28:56.896007Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:28:56.975718Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:28:56.976045Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:29:08.871129Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:29:08.872344Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:29:08.950535Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:29:08.950900Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:29:21.233531Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:29:21.234632Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:29:21.313784Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:29:21.314208Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:29:33.053333Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:29:33.055575Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:29:33.143601Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:29:33.143933Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:29:45.715708Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:29:45.717007Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:29:45.789787Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:29:45.790119Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:29:57.671441Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:29:57.673299Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:29:57.819722Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:29:57.820453Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:30:09.522699Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:30:09.524248Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:30:09.666455Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:30:09.667256Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:30:22.097898Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:30:22.099271Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:30:22.181115Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:30:22.181486Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:30:33.900247Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:30:33.901829Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:30:33.983288Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:30:33.983543Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:30:45.703054Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:30:45.704345Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:30:45.781916Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:30:45.782174Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:30:58.177843Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:30:58.179019Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:30:58.253441Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:30:58.253677Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:31:09.838569Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:31:09.840138Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:31:09.928057Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:31:09.928312Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:31:22.002360Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:31:22.004236Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:31:22.083617Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:31:22.083863Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:31:34.407351Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:31:34.408732Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:31:34.498656Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:31:34.498946Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
+[2m2025-12-28T15:31:46.313038Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove[0m[2m:[0m version: 3.0.3
+[2m2025-12-28T15:31:46.314110Z[0m [34mDEBUG[0m [2mrisc0_zkvm::host::client::prove::external[0m[2m:[0m Launching r0vm
+[2m2025-12-28T15:31:46.429040Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Real prover failed (No such file or directory (os error 2)), falling back to mock proof
+[2m2025-12-28T15:31:46.429416Z[0m [33m WARN[0m [2mrollup_node::proof_adapter[0m[2m:[0m Verified as mock proof fallback (real prover unavailable)
