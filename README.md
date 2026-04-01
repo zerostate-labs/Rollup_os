@@ -38,18 +38,22 @@ ZeroState unifies all of them into a **single programmable abstraction**:
 
 ## Architecture
 
-```mermaid
-graph TD
-    U[Users] --> RN[Rollup Node]
-    RN --> SM[State Machine]
-    RN --> BP[Block Producer]
-    BP --> P[Prover (zkVM)]
-    BP --> DA[Celestia DA]
-    P --> L1[Settlement (Ethereum/Base)]
-    RN --> R[Receipts & Accountability]
-````
+Our rollup system consists of several key components working together:
 
----
+```mermaid
+graph TB
+    A[Users] --> B[Rollup Node]
+    B --> C[State Management]
+    B --> D[Transaction Queue]
+    B --> E[Block Production]
+    E --> F[Proof Generation]
+    E --> G[Data Availability]
+    F --> H[Risc0 ZKVM]
+    G --> I[Celestia Blobs]
+    B --> J[Receipt System]
+    J --> K[Execution Tracking]
+```
+
 
 ## System Components
 
