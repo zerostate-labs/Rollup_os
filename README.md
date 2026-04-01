@@ -310,14 +310,5 @@ Submit transaction:
 curl -X POST http://localhost:8080/tx ...
 ```
 
----
-
-## License
-
-MIT
-
-```
-
----
 
 
